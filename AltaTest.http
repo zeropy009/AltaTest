@@ -1,0 +1,6 @@
+@AltaTest_HostAddress = http://localhost:5118
+
+GET {{AltaTest_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
