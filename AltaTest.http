@@ -1,6 +1,6 @@
 @AltaTest_HostAddress = http://localhost:5118
 
-GET {{AltaTest_HostAddress}}/weatherforecast/
+GET {{AltaTest_HostAddress}}/AltaTest/
 Accept: application/json
 
 ###

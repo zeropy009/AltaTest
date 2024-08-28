@@ -1,4 +1,5 @@
 using AltaTest.Data;
+using AltaTest.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Runtime.CompilerServices;
@@ -21,17 +22,21 @@ namespace AltaTest.Controllers
         }
 
         [HttpGet(Name = "AltaTest")]
-        public IActionResult Get()
+        public IActionResult Get(DateOnly? date, int page = 1, int pageSize = 10)
         {
+            if (date == null)
+            {
+                return BadRequest("Please enter date !!!");
+            }
             StringBuilder sb = new StringBuilder();
             sb.Append("select ROW_NUMBER() OVER (ORDER BY sum(b.point) DESC, max(b.DateTime), a.Name, b.PlayerId) AS STT, ");
-            sb.Append("    b.PlayerId, a.Name, a.Gender, sum(b.point) as point, max(b.DateTime) as DateTime ");
+            sb.Append("    b.PlayerId, a.Name, a.Gender, sum(b.point) as Point, max(b.DateTime) as DateTime ");
             sb.Append("from Players a ");
             sb.Append("    left join Points b on a.Id = b.PlayerId ");
+            sb.Append("where MONTH(b.DateTime) = {0} and YEAR(b.DateTime) = {1} ");
             sb.Append("group by b.PlayerId, a.Name, a.Gender ");
-            sb.Append("order by point DESC, DateTime, Name, PlayerId ");
-            FormattableString query = FormattableStringFactory.Create(sb.ToString());
-            return Ok(_context.Database.ExecuteSql(query));
+            FormattableString query = FormattableStringFactory.Create(sb.ToString(), [date?.Month, date?.Year]);
+            return Ok(_context.Database.SqlQuery<View01>(query).Skip(pageSize*(page - 1)).Take(pageSize));
         }
     }
 }
