@@ -1,7 +1,7 @@
 using AltaTest.Data;
-using AltaTest.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace AltaTest.Controllers
@@ -21,18 +21,17 @@ namespace AltaTest.Controllers
         }
 
         [HttpGet(Name = "AltaTest")]
-        public IEnumerable<View01> Get()
+        public IActionResult Get()
         {
-            IEnumerable<View01> view01s = new List<View01>();
-            StringBuilder query = new StringBuilder();
-            query.Append("select ROW_NUMBER() OVER (ORDER BY sum(b.point) DESC, max(b.DateTime), a.Name, b.PlayerId) AS STT, ");
-            query.Append("    b.PlayerId, a.Name, a.Gender, sum(b.point) as point, max(b.DateTime) as DateTime ");
-            query.Append("from Players a ");
-            query.Append("    left join Points b on a.Id = b.PlayerId ");
-            query.Append("group by b.PlayerId, a.Name, a.Gender ");
-            query.Append("order by point DESC, DateTime, Name, PlayerId ");
-            view01s = _context.Database.ExecuteSql(query.ToString());
-            return view01s;
+            StringBuilder sb = new StringBuilder();
+            sb.Append("select ROW_NUMBER() OVER (ORDER BY sum(b.point) DESC, max(b.DateTime), a.Name, b.PlayerId) AS STT, ");
+            sb.Append("    b.PlayerId, a.Name, a.Gender, sum(b.point) as point, max(b.DateTime) as DateTime ");
+            sb.Append("from Players a ");
+            sb.Append("    left join Points b on a.Id = b.PlayerId ");
+            sb.Append("group by b.PlayerId, a.Name, a.Gender ");
+            sb.Append("order by point DESC, DateTime, Name, PlayerId ");
+            FormattableString query = FormattableStringFactory.Create(sb.ToString());
+            return Ok(_context.Database.ExecuteSql(query));
         }
     }
 }
